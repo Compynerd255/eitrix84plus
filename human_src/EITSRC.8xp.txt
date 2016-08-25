@@ -1,0 +1,668 @@
+.EITRIX VS TETRIS
+#Icon(FF00DD109920FF200F410D4289244F242F242D44A9486F500000000000000000)
+DiagnosticOff
+Normal
+
+prgmEITSCDAT
+
+prgmGCNLIB
+#Axiom(CN2AXE)
+
+Lbl CONST
+#Realloc(°SRAM)
+°A+56→°SCR
+°SCR+2→°ANTIM
+°ANTIM+1→GDB4
+GDB4+48→GDB4KEYS
+GDB4KEYS+8→GDB4EVTS
+GDB4EVTS+10→GDB4ATKS
+GDB4ATKS+15→°SAVE
+°SAVE+2→°BUF
+.VOLATILE MEM SIZE
+°SAVE-°SRAM→GDB5VMSZ
+.CALCNET DATA
+L₄→GDB6ADRS
+
+Lbl SETUP
+.DEFINE SAVE
+"appvEitrix"→Str9
+"appvEITTMP"→Str9T
+UnArchive Str9
+GetCalc(Str9)→SAVE
+!If SAVE
+GetCalc(Str9,10)→SAVE
+Fill(SAVE,10,0
+End
+GetCalc(Str9T,768)→BUF
+
+Lbl MAIN
+Fix 5
+While 1
+0→X→C→M
+Repeat C
+getKey→K
+!If K-4
+X-1^4→X
+Else!If K-1
+X+1^4→X
+ElseIf K=54 or (K=9)
+→C
+Else!If K-15
+1→C+2→X
+End
+Copy(Pic0T,L₆,768
+Pt-On(4,X*8+22,Pic0C
+DispGraph
+End
+!If X
+STA()
+Else!If X-1
+→M
+GAM(0)
+Else!If X-2
+LKG()
+Else!If X-3
+Fix 4
+Archive Str9
+DelVar Str9T
+Return
+End
+End
+
+Lbl STA
+ClrDraw
+Text(0,,"STATS"
+Text(0,8,"SOLO:"
+Text(0,16,"HI SCORES"
+For(I,0,2
+Text(0,I*7+24,{I*2+SAVE}ʳ►Dec
+End
+.DISP LINK RECORDS
+Text(48,8,"LINK:"
+Text(48,16,"W: ",{SAVE+6}ʳ►Dec
+Text(48,24,"L: ",{SAVE+8}ʳ►Dec
+Text(0,56,"PRESS ANY KEY"
+DispGraph
+Repeat getKey
+End
+Return
+
+.LINK GAME
+Lbl LKG
+Fill(GDB6ADRS,5,0
+normalpdf(
+ClrDraw
+Text(0,0,"WAITING…"
+Text(0,8,"PRESS CLEAR TO CANCEL"
+Text(0,56,"VERSION  ",{GDB0VERS}►Dec,". ",{GDB0VERS+1}►Dec
+If {GDB0VERS+2}ʳ
+Text ". ",{GDB0VERS+2}ʳ►Dec
+End
+0→C→{°TXSIZ+1}
+Fill(°TXID,5,0
+128→TXDAT
+{GDB0VERS}ʳ→{°TXDAT+2}ʳ
+6→TXSIZ
+.DON'T SET TX YET
+Repeat C
+If RXSIZ[e][e]0
+!If {°RXDAT+2}ʳ-{GDB0VERS}ʳ??RXDATʳ-128
+Copy(°RXID,GDB6ADRS,5)
+0→{°TXSIZ+1}
+2→C
+!If {°RXDAT+1}
+Copy(°RXID,°TXID,5)
+128→TXDATʳ
+1→{°TXDAT+1}
+{GDB0VERS}ʳ→{°TXDAT+2}ʳ
+6→TXSIZ
+128→{°TXSIZ+1}
+End
+End
+0→{°RXSIZ+1}
+End
+!If TXSIZ[e][e]0
+6→{°TXSIZ}
+128→{°TXSIZ+1}
+End
+DispGraph
+getKey(15)+C→C
+End
+!If C-2
+Text(2,32,"READY! STARTING GAME…"
+DispGraph
+GAM(1)
+End
+normalcdf(
+getKey
+Return
+
+Lbl GAM
+Fill(°SRAM,GDB5VMSZ,0)
+r₁→M
+
+4→X
+64→E
+100→S
+rand^7→Q
+rand^7→N
+1→O
+
+.START GAME
+ClrDraw
+Copy(Pic0,BUF
+Repeat D
+→θ
+T++
+Copy(BUF,L₆
+sub(INP
+sub(TIM
+0→T
+If {GDB4EVTS+7}ʳ≥32768?P=0
+If W
+rand^256+128→{GDB4EVTS+7}ʳ
+!If ANTIMʳ
+→W
+1→θ
+End
+Else
+SSP()
+rand^256+(W?1024,128)→{GDB4EVTS+7}ʳ
+End
+End
+If {GDB4EVTS+2}ʳ≥32768
+500→{GDB4EVTS+2}ʳ
+S--
+End
+If {GDB4KEYS+2}-1<128
+255→{GDB4EVTS}
+{GDB4KEYS+2}-8→{GDB4KEYS+2}
+End
+If {GDB4EVTS}≥128
+min(96,S)→{GDB4EVTS}
+!If sub(MVB,X,Y+1,R
+sub(SET
+sub(CLR
+0→Y:N→Q:rand^7→N
+If {GDB4ATKS+8}:N^2+5→N:End
+rand^4+3→X:0→R
+!If MVB(X,Y,R)
+sub(CLB
+MVB(X,Y,R)=0→D
+End
+End
+End
+If {GDB4KEYS}-1<128
+sub(MVB,X-1,Y,R
+{GDB4KEYS}-16→{GDB4KEYS}
+End
+If {GDB4KEYS+1}-1<128
+sub(MVB,X+1,Y,R
+{GDB4KEYS+1}-16→{GDB4KEYS+1}
+End
+If {GDB4KEYS+3}-1<128
+0→J
+While sub(MVB,X,Y+1,R
+→J
+End
+(J?S,0)→{GDB4EVTS}
+{GDB4KEYS+3}-48→{GDB4KEYS+3}
+End
+If {GDB4KEYS+4}-1<128
+sub(MVB,X,Y,R+1^4
+{GDB4KEYS+4}-48→{GDB4KEYS+4}
+End
+If {GDB4KEYS+5}-1<128
+sub(MVB,X,Y,R-1^4
+{GDB4KEYS+5}-48→{GDB4KEYS+5}
+End
+If O?({GDB4KEYS+6}-1<128)
+255→ANTIMʳ
+O-1→O
+{GDB4KEYS+6}-64→{GDB4KEYS+6}
+End
+If {GDB4EVTS+1}≥128?P
+0→{GDB4EVTS+1}
+sub(CLB
+End
+T++
+sub(RCV
+sub(ATK
+If θ
+Copy(Pic0,L₆
+.CHECK SPECIAL
+If W
+!If sub(CHB,U,V)
+→W
+rand^256+128→{GDB4EVTS+7}ʳ
+End
+End
+sub(DWG
+.FIND GRID HT
+16→G
+For(I,0,15
+If {I*3+GDB4}/16??{I*3+1+GDB4}/16??{I*3+2+GDB4}/64
+I→G:Goto GH1
+End
+End
+Lbl GH1
+G<8?T++
+If M
+SND(255,G)
+End
+Copy(L₆,BUF
+T+2→T
+End
+sub(DSP
+{GDB4ATKS+6}??sub(DNP)
+({GDB4ATKS+9}?rand^4)??sub(DWB)
+sub(DST
+Rect(93,E,3,64-E
+If E<12 and ({GDB4EVTS+6}[e]2)
+RectI(93,0,3,64
+End
+DispGraph
+getKey(15)+D→D
+End
+.END OF GAME
+!If D-1
+.GAME OVER
+For(I,0,63
+Rect(24,63-I,40,1
+DispGraph
+End
+If M
+.LET OPPONENT KNOW
+SND(1,0)
+.WAIT FOR IT
+For(T,0,256
+TXSIZ[e][e]0??256→T
+End
+{SAVE+8}ʳ++
+Else
+For(I,0,2
+If SCR≥{I*2+SAVE}ʳ
+If I<2
+Copy(SAVE+3,SAVE+5,(I?2,4))ʳ
+End
+SCR→{I*2+SAVE}ʳ
+I+1*256-1→I
+End
+End
+!If I^256
+Fix 3
+Text(26,16,"High Score!"
+Fix 2
+DispGraph
+End
+End
+Else!If D-2
+Rect(0,8,96,24
+Pt-Off(44,16,8+Pic9W
+For(I,0,36
+Pt-Off(I,16,Pic9W
+Pt-Off(88-I,16,+Pic9W
+DispGraph
+Pause 10
+End
+.M MUST BE TRUE
+{SAVE+6}ʳ++
+End
+Pause 2000
+Return
+
+.ATTACK
+Lbl ATK
+If ANTIMʳ
+ANTIMʳ--
+For(I,0,10
+If {I+GDB4ATKS}
+0→{I+GDB4ATKS}
+0→ANTIMʳ
+28→{GDB4EVTS+9}
+End
+End
+If ANTIMʳ=1?W
+For(I,0,9
+SEB(I,V,1)
+End
+CLR()
+End
+End
+ReturnIf P
+If {GDB4ATKS}
+→I
+If I<7
+For(J,0,9
+sub(SEB,J,9+I,1
+End
+sub(SEB,rand^10,9+I,0
+End
+I-1→{GDB4ATKS}
+End
+If {GDB4ATKS+1}
+-1→{GDB4ATKS+1}
+rand^10→A
+rand^16→B
+If CHB(A,B)
+SEB(A,B,0)
+End
+End
+If {GDB4ATKS+2}
+-1→{GDB4ATKS+2}
+!If {GDB4ATKS+2}≥4
+S-10→S
+0→{GDB4ATKS+2}
+End
+End
+If {GDB4ATKS+3}
+-1→{GDB4ATKS+3}
+For(I,1,5
+rand^8+1→A:rand^14+1→B
+rand^3-1+A→X₁ᴛ:rand^3-1+B→Y₁ᴛ
+If sub(CHB,A,B)=0?sub(CHB,X₁ᴛ,Y₁ᴛ)
+sub(SEB,A,B,1
+sub(SEB,X₁ᴛ,Y₁ᴛ,0
+End
+End
+sub(CLR
+End
+If {GDB4ATKS+4}
+-1→{GDB4ATKS+4}
+If {GDB4ATKS+4}<9
+Copy({GDB4ATKS+4}-1*3+GDB9TE,{GDB4ATKS+4}*3+21+GDB4,3
+.P·(65535-e^({GDB4ATKS+4}+8))→P
+1→θ
+End
+End
+If {GDB4ATKS+5}
+-1→{GDB4ATKS+5}
+!If {GDB4ATKS+5}-5
+If G<16
+For(I,G,15-(15-G/2)
+Exch(I*3+GDB4,15+G-I*3+GDB4,3
+End
+1→θ
+End
+End
+End
+Return
+
+.SEND FRAME
+Lbl SND
+ReturnIf TXSIZ[e][e]0?r₁>{°TXDAT}
+0→{°TXSIZ+1}
+Copy(GDB6ADRS,°TXID,5)
+r₁→{°TXDAT}
+r₂→{°TXDAT+1}
+2→TXSIZ
+FnOn :Stop
+128→{°TXSIZ+1}
+Return
+
+.RECIEVE FRAME
+Lbl RCV
+If M
+If RXSIZ[e][e]0
+{°RXDAT}→A
+{°RXDAT+1}→B
+!If A-255
+B*4→E
+Else!If A-1
+2→D
+Else!If A-2
+{B+GDB2-1}→{B+GDB4ATKS-1}
+End
+0→RXSIZ
+End
+Else
+!If rand^max(1024-SCR,256)
+rand^10→A
+{A+GDB2}→{A+GDB4ATKS}
+End
+End
+Return
+
+.ACTIVATE SPECIAL
+Lbl ASP
+!If W-1
+O+1→O
+Else!If W-2
+Fill(GDB4,48,0
+1→θ
+Else!If W-3
+S+20→S
+Else
+.SEND ATTACK
+If M
+SND(2,W-3)
+End
+End
+.RESET SPC PLACEMENT TIMER
+rand^256+128→{GDB4EVTS+7}ʳ
+0→W
+Return
+
+.CHECK BLOCK
+Lbl CHB
+r₂*3+(r₁/4)→r₃
+0:ReturnIf r₃<<0??(r₃>=>=48)
+{r₃+GDB4}[e](r₁^4)
+Return
+
+.SET SPECIAL
+Lbl SSP
+1→θ
+For(C,1,4)
+rand^10→A
+rand^16→B
+If sub(CHB,A,B
+A→U:B→V
+!If rand^4
+1→W
+Else
+rand^(M*10+3)+1→W
+End
+.BREAK FOR
+Return
+Else
+0→W
+End
+End
+Return
+
+Lbl TIM
+{GDB4EVTS}-T→{GDB4EVTS}
+{GDB4EVTS+1}-T→{GDB4EVTS+1}
+{GDB4EVTS+2}ʳ-T→{GDB4EVTS+2}ʳ
+{GDB4EVTS+4}ʳ-T→{GDB4EVTS+4}ʳ
+{GDB4EVTS+6}-T→{GDB4EVTS+6}
+{GDB4EVTS+7}ʳ-T→{GDB4EVTS+7}ʳ
+{GDB4EVTS+9}?-min({GDB4EVTS+9},T)→{GDB4EVTS+9}
+Return
+
+Lbl CLB
+For(I,0,15
+If P[e][e]I
+→θ
+For(J,0,I
+I-J-1→A
+Copy(A*3+GDB4,A+1*3+GDB4,3
+End
+0→{GDB4}→{GDB4+1}→{GDB4+2}
+If W
+V-I??ASP()
+V<I?V++
+End
+End
+End
+0→P
+Return
+
+Lbl CLR
+0→J
+For(I,0,15
+If {I*3+GDB4}/16=15 ? {I*3+1+GDB4}/16=15 ? {I*3+2+GDB4}/64=3
+.SET ROW CLEAR
+P﹢e^(15-I)→P
+.SET CLEAR TIMER
+5→{GDB4EVTS+1}
+.SET GRID {UNKNOWN TOKEN [239]}BRAW
+→θ
+.ADD ROW COUNT
+J+1→J
+End
+End
+.ADD TO SCORE
+.SAVE OLD FOR COMPARE
+SCR→A
+.TRIANGLE NUM
+J+1*J/2+SCR→SCR
+.BONUS ANTIDOTE EVERY 16 PTS
+If SCR^16<(A^16)
+O++
+End
+Return
+
+Lbl MVB
+For(I,0,3
+sub(LDBʳ,Q,r₃,I,°A,°B
+If (A+r₁<<0) or (A+r₁>=>=10) or (B+r₂>>15)
+0:Return
+End
+If B+r₂>=>=0
+If {B+r₂*3+(A+r₁/4)+GDB4}[e](A+r₁^4)
+0:Return
+End
+End
+End
+r₁→X:r₂→Y:r₃→R
+1:Return
+
+.LOAD BLOCK
+Lbl LDB
+{r₁*4+r₂*4+r₃+GDB1}→r₆
+/16→{r₄}ʳ
+r₆^16→{r₅}ʳ
+{r₄}ʳ-({r₄}ʳ>8*16)→{r₄}ʳ
+{r₅}ʳ-({r₅}ʳ>8*16)→{r₅}ʳ
+Return
+
+Lbl SET
+For(I,0,3
+sub(LDB,Q,R,I,°A,°B
+sub(SEB,A+X,B+Y,1
+End
+Return
+
+Lbl SEB
+r₂*3+(r₁/4)→A
+ReturnIf A<<0 or (A>=>=48)
+e^(3-(r₁^4)+4)→B
+→θ
+If r₃
+{A+GDB4} or B→{A+GDB4}
+Else
+B xor 255 and {A+GDB4}→{A+GDB4}
+End
+Return
+
+Lbl DWG
+For(I,0,47
+{I+GDB4}→A
+For(J,0,3
+If A[e]J and (I^3*4+J<10)
+Pt-On(J+(I^3*4)*4+24,I/3*4,P[e][e](I/3)*8+Pic1
+End
+End
+End
+If W
+Pt-Change(U*4+24,V*4,Pic1+16
+End
+Return
+
+Lbl DWB
+For(I,0,3
+sub(LDB,Q,R,I,°A,°B
+Pt-On(A+X*4+24,B+Y*4,Pic1
+End
+Return
+
+.DISTORTION ATTACKS
+Lbl DST
+If {GDB4ATKS+7}
+T+2→T
+.STATIC
+For(I,0,63
+For(J,3,7
+{I*12+J+L₆} or rand→{I*12+J+L₆}
+End
+End
+End
+Return
+
+Lbl DSP
+.DRAW BLOCK POWER
+If W
+Pt-On(68,4,W-1*8+Pic2
+End
+.DRAW ATTACKS
+!If ANTIMʳ
+→J
+For(I,0,9
+If {GDB4ATKS+I}
+Pt-Off(J^2*9+66,J/2*9+17,I+3*8+Pic2
+J+1→J
+End
+End
+Else
+Pt-Off(76,33,Pic2
+Rect(72,30,ANTIMʳ/16,1
+If W?(255-ANTIMʳ)/32→A
+For(I,1,A
+Line(rand^2+(U*4)+25,rand^2+(V*4)+1,rand^4+76,rand^4+36
+End
+End
+End
+.ANTIDOTE EXPLODE
+If {GDB4EVTS+9}
+Circle(77,34,32-{GDB4EVTS+9}/2
+End
+Text(1,17,SCR►Dec
+.ANTIDOTE COUNT
+If O
+Pt-Off(0,25,Pic2
+Text(9,25,O►Dec
+End
+.OPPONENT MESSAGES
+…
+NOTES
+TWO 1-BYTE VARS, ONE FOR TYPE, ONE FOR TIME.
+RECIEVED MESSAGES REFRESH TIME, SET TYPE
+IF TIME EXPI{UNKNOWN TOKEN [239]}B, NO MESSAGE SHOWN
+OTHERWISE, SHOW STRING FROM DATA
+…
+Return
+
+Lbl DNP
+For(I,0,3
+sub(LDB,N,0,I,°A,°B
+Pt-On(A*4+10,B*4+52,Pic1
+End
+Return
+
+Lbl INP
+T→A
+While A>>0
+max(A,4)→B
+A-B→A
+(getKey(2)?{GDB4KEYS}+B,0)→{GDB4KEYS
+(getKey(3)?{GDB4KEYS+1}+B,0)→{GDB4KEYS+1
+(getKey(1)?{GDB4KEYS+2}+B,0)→{GDB4KEYS+2
+(getKey(48)?{GDB4KEYS+3}+B,0)→{GDB4KEYS+3
+(getKey(54)?{GDB4KEYS+4}+B,0)→{GDB4KEYS+4
+(getKey(4)?{GDB4KEYS+5}+B,0)→{GDB4KEYS+5
+(getKey(55)?{GDB4KEYS+6}+B,0)→{GDB4KEYS+6
+(getKey(40)?{GDB4KEYS+7}+B,0)→{GDB4KEYS+7
+End
+Return
